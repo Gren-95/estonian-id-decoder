@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Estonian ID Code Decoder</title>
+  <meta name="description" content="Decode an Estonian personal identification code (isikukood) entirely in your browser — birth date, age, gender and checksum validity. Nothing is sent anywhere." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🇪🇪</text></svg>" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-flag" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <header class="hero">
+      <p class="eyebrow">Isikukood</p>
+      <h1>Estonian ID Code Decoder</h1>
+      <p class="sub">Paste or type an Estonian personal identification code to decode the birth date, gender and checksum — fully offline, in your browser.</p>
+    </header>
+
+    <section class="card" aria-labelledby="input-heading">
+      <h2 id="input-heading" class="sr-only">Enter an ID code</h2>
+      <label for="idInput" class="field-label">Isikukood (11 digits)</label>
+      <div class="input-row">
+        <input
+          id="idInput"
+          type="text"
+          inputmode="numeric"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="e.g. 37605030299"
+          maxlength="16"
+          aria-describedby="idHelp"
+        />
+        <button id="randomBtn" type="button" class="ghost-btn" title="Generate a valid example code">Example</button>
+      </div>
+      <p id="idHelp" class="help">Digits only; spaces or dashes are ignored. Nothing you type leaves this page.</p>
+    </section>
+
+    <section id="result" class="result" hidden aria-live="polite">
+      <div class="status-banner" id="statusBanner"></div>
+
+      <div class="grid">
+        <div class="stat">
+          <span class="stat-label">Gender</span>
+          <span class="stat-value" id="valGender">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Date of birth</span>
+          <span class="stat-value" id="valDob">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Age</span>
+          <span class="stat-value" id="valAge">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Day of week born</span>
+          <span class="stat-value" id="valDow">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Birth order that day</span>
+          <span class="stat-value" id="valSeq">—</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Checksum digit</span>
+          <span class="stat-value" id="valChecksum">—</span>
+        </div>
+      </div>
+
+      <button id="copyBtn" type="button" class="ghost-btn" hidden>Copy summary</button>
+    </section>
+
+    <section class="explainer">
+      <details>
+        <summary>How the code is structured</summary>
+        <div class="explainer-body">
+          <p>An Estonian isikukood is 11 digits: <code>G YYMMDD SSS C</code></p>
+          <table>
+            <thead><tr><th>Position</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>G</code></td><td>Century &amp; gender: 1/2 = male/female born 1800–1899, 3/4 = 1900–1999, 5/6 = 2000–2099, 7/8 = 2100–2199</td></tr>
+              <tr><td><code>YYMMDD</code></td><td>Date of birth</td></tr>
+              <tr><td><code>SSS</code></td><td>Sequential number distinguishing people born on the same date</td></tr>
+              <tr><td><code>C</code></td><td>Checksum digit, computed with a weighted mod-11 algorithm over the first 10 digits</td></tr>
+            </tbody>
+          </table>
+          <p class="muted">This tool only parses the public, self-describing structure of the code. It does not look anyone up and makes no network requests — check the Network tab if you like.</p>
+        </div>
+      </details>
+    </section>
+
+    <footer class="footer">
+      <p>Runs 100% client-side — no data is transmitted anywhere.</p>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
