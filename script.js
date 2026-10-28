@@ -3,10 +3,11 @@
 /**
  * Estonian personal identification code (isikukood) decoding.
  * Structure: G YYMMDD SSS C  (11 digits total)
- *   G    — century + gender
- *   YYMMDD — date of birth
- *   SSS  — sequence number for people born the same day
- *   C    — checksum digit
+ *   G      century + gender
+ *   YYMMDD date of birth
+ *   SSS    serial number for people born the same day; before 2013 it
+ *          also encoded the hospital of birth
+ *   C      checksum digit
  */
 
 const CENTURY_BY_GENDER_DIGIT = {
@@ -55,7 +56,7 @@ function decodeEstonianId(raw) {
   const genderDigit = d[0];
   const centuryInfo = CENTURY_BY_GENDER_DIGIT[genderDigit];
   if (!centuryInfo) {
-    return { ok: false, error: `First digit must be 1–8 (got ${genderDigit}).` };
+    return { ok: false, error: `First digit must be 1-8 (got ${genderDigit}).` };
   }
 
   const yy = d[1] * 10 + d[2];
@@ -150,7 +151,7 @@ function render(raw) {
   if (!result.ok) {
     statusBanner.className = 'status-banner bad';
     statusBanner.textContent = result.error;
-    for (const el of Object.values(fields)) el.textContent = '—';
+    for (const el of Object.values(fields)) el.textContent = '-';
     copyBtn.hidden = true;
     return;
   }
@@ -163,11 +164,11 @@ function render(raw) {
   } else {
     statusBanner.className = 'status-banner bad';
     if (!data.dateValid) {
-      statusBanner.textContent = 'Invalid — the embedded date of birth does not exist';
+      statusBanner.textContent = 'Invalid: the embedded date of birth does not exist';
     } else if (data.isFutureDate) {
-      statusBanner.textContent = 'Invalid — the embedded date of birth is in the future';
+      statusBanner.textContent = 'Invalid: the embedded date of birth is in the future';
     } else {
-      statusBanner.textContent = `Invalid checksum — expected ${data.expectedChecksum}, code has ${data.givenChecksum}`;
+      statusBanner.textContent = `Invalid checksum: expected ${data.expectedChecksum}, the code has ${data.givenChecksum}`;
     }
   }
 
@@ -175,9 +176,10 @@ function render(raw) {
   fields.dob.textContent = data.dateValid
     ? `${dateFormatter.format(data.dob)} (${data.century}s)`
     : `${String(data.day).padStart(2, '0')}.${String(data.month).padStart(2, '0')}.${data.year} (invalid date)`;
-  fields.age.textContent = data.age !== null ? `${data.age} years` : '—';
-  fields.dow.textContent = data.weekday || '—';
-  fields.seq.textContent = `#${String(data.sequence).padStart(3, '0')} that day`;
+  fields.age.textContent = data.age !== null ? `${data.age} years` : '-';
+  fields.dow.textContent = data.weekday || '-';
+  fields.seq.textContent = String(data.sequence).padStart(3, '0') +
+    (data.dateValid && data.year < 2013 ? ' (also encodes the birth hospital)' : '');
   fields.checksum.textContent = data.checksumValid
     ? `${data.givenChecksum} ✓`
     : `${data.givenChecksum} (expected ${data.expectedChecksum})`;
@@ -185,7 +187,7 @@ function render(raw) {
   copyBtn.hidden = false;
   copyBtn.dataset.summary =
     `Estonian ID ${data.digits}: ${data.gender}, born ${data.dateValid ? dateFormatter.format(data.dob) : 'invalid date'}` +
-    `${data.age !== null ? `, ${data.age} years old` : ''} — ${data.valid ? 'valid' : 'invalid'} code.`;
+    `${data.age !== null ? `, ${data.age} years old` : ''}. ${data.valid ? 'Valid' : 'Invalid'} code.`;
 }
 
 idInput.addEventListener('input', () => render(idInput.value));
@@ -204,11 +206,14 @@ copyBtn.addEventListener('click', async () => {
     copyBtn.textContent = 'Copied!';
     setTimeout(() => { copyBtn.textContent = original; }, 1400);
   } catch {
-    // Clipboard API unavailable (e.g. insecure context) — fail silently, nothing sensitive lost.
+    // Clipboard API unavailable (e.g. insecure context): fail silently, nothing is lost.
   }
 });
 
-/** Builds a syntactically valid, randomly dated example code — not a real person. */
+/**
+ * Builds a valid code with a random 1900s birth date, as an example. It is not
+ * looked up anywhere, but a valid code can match a real person's by chance.
+ */
 function generateExampleId() {
   const genderDigit = String(3 + Math.floor(Math.random() * 2)); // 3-4: always a past 1900s date
   const yy = String(Math.floor(Math.random() * 100)).padStart(2, '0');
