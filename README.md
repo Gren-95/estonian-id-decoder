@@ -9,6 +9,22 @@ nothing you type leaves the page.
 
 ![The decoder showing a valid code: male, born 3 May 1976, aged 50, born on a Monday](docs/screenshot.png)
 
+## Batch mode
+
+The **Batch** tab (or `#batch` in the URL) decodes many codes at once. Paste
+a list (one per line; commas, semicolons and tabs also work) or load a `.txt`
+/ `.csv` file. It is read locally, never uploaded. You get valid/invalid counts,
+a filterable results table, and a CSV export (copy or download) with the
+gender, ISO date of birth, age, weekday and serial number for each code.
+
+## Excel formulas
+
+The **Excel** tab (`#excel`) gives copy-ready formulas for status, gender,
+date of birth and age, to decode a whole column in Excel 365 / 2021+. Pick the
+column holding the codes and the first data row, and the cell references
+update. Choose comma or semicolon separators to match your regional settings
+(Estonian settings use semicolons).
+
 ## How the code is structured
 
 An isikukood is 11 digits: `G YYMMDD SSS C`

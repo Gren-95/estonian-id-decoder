@@ -18,57 +18,155 @@
       <p class="sub">Paste or type an Estonian personal identification code to decode the birth date, gender and checksum. It works offline, in your browser.</p>
     </header>
 
-    <section class="card" aria-labelledby="input-heading">
-      <h2 id="input-heading" class="sr-only">Enter an ID code</h2>
-      <label for="idInput" class="field-label">Isikukood (11 digits)</label>
-      <div class="input-row">
-        <input
-          id="idInput"
-          type="text"
-          inputmode="numeric"
-          autocomplete="off"
+    <div class="tabs" role="tablist" aria-label="Decoder mode">
+      <button type="button" role="tab" class="tab" id="tab-single" aria-controls="panel-single" aria-selected="true">Single</button>
+      <button type="button" role="tab" class="tab" id="tab-batch" aria-controls="panel-batch" aria-selected="false" tabindex="-1">Batch</button>
+      <button type="button" role="tab" class="tab" id="tab-excel" aria-controls="panel-excel" aria-selected="false" tabindex="-1">Excel</button>
+    </div>
+
+    <div id="panel-single" role="tabpanel" aria-labelledby="tab-single">
+      <section class="card" aria-labelledby="input-heading">
+        <h2 id="input-heading" class="sr-only">Enter an ID code</h2>
+        <label for="idInput" class="field-label">Isikukood (11 digits)</label>
+        <div class="input-row">
+          <input
+            id="idInput"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="e.g. 37605030299"
+            maxlength="16"
+            aria-describedby="idHelp"
+          />
+          <button id="randomBtn" type="button" class="ghost-btn" title="Generate a valid example code">Example</button>
+        </div>
+        <p id="idHelp" class="help">Digits only; spaces or dashes are ignored. Nothing you type leaves this page.</p>
+      </section>
+
+      <section id="result" class="result" hidden aria-live="polite">
+        <div class="status-banner" id="statusBanner"></div>
+
+        <div class="grid">
+          <div class="stat">
+            <span class="stat-label">Gender</span>
+            <span class="stat-value" id="valGender">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Date of birth</span>
+            <span class="stat-value" id="valDob">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Age</span>
+            <span class="stat-value" id="valAge">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Day of week born</span>
+            <span class="stat-value" id="valDow">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Serial number</span>
+            <span class="stat-value" id="valSeq">-</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Checksum digit</span>
+            <span class="stat-value" id="valChecksum">-</span>
+          </div>
+        </div>
+
+        <button id="copyBtn" type="button" class="ghost-btn" hidden>Copy summary</button>
+      </section>
+    </div>
+
+    <div id="panel-batch" role="tabpanel" aria-labelledby="tab-batch" hidden>
+      <section class="card" aria-labelledby="batch-heading">
+        <h2 id="batch-heading" class="sr-only">Decode many ID codes</h2>
+        <label for="batchInput" class="field-label">Isikukoodid (one per line)</label>
+        <textarea
+          id="batchInput"
+          rows="8"
           spellcheck="false"
-          placeholder="e.g. 37605030299"
-          maxlength="16"
-          aria-describedby="idHelp"
-        />
-        <button id="randomBtn" type="button" class="ghost-btn" title="Generate a valid example code">Example</button>
-      </div>
-      <p id="idHelp" class="help">Digits only; spaces or dashes are ignored. Nothing you type leaves this page.</p>
-    </section>
+          autocomplete="off"
+          placeholder="37605030299&#10;49403136526&#10;..."
+          aria-describedby="batchHelp"
+        ></textarea>
+        <div class="batch-actions">
+          <button id="batchExampleBtn" type="button" class="ghost-btn" title="Fill in a few generated example codes">Examples</button>
+          <button id="batchFileBtn" type="button" class="ghost-btn" title="Read codes from a .txt or .csv file">Load file…</button>
+          <input id="batchFile" type="file" accept=".txt,.csv,text/plain,text/csv" hidden />
+          <button id="batchClearBtn" type="button" class="ghost-btn">Clear</button>
+        </div>
+        <p id="batchHelp" class="help">One code per line; commas, semicolons and tabs also separate codes, and lines without digits are skipped. Files are read locally and never uploaded.</p>
+      </section>
 
-    <section id="result" class="result" hidden aria-live="polite">
-      <div class="status-banner" id="statusBanner"></div>
+      <section id="batchResult" class="result" hidden>
+        <div class="summary" aria-live="polite">
+          <div class="stat"><span class="stat-label">Total</span><span class="stat-value" id="batchTotal">0</span></div>
+          <div class="stat"><span class="stat-label">Valid</span><span class="stat-value good" id="batchValid">0</span></div>
+          <div class="stat"><span class="stat-label">Invalid</span><span class="stat-value bad" id="batchInvalid">0</span></div>
+        </div>
 
-      <div class="grid">
-        <div class="stat">
-          <span class="stat-label">Gender</span>
-          <span class="stat-value" id="valGender">-</span>
+        <div class="batch-toolbar">
+          <label class="filter">
+            <span class="sr-only">Show</span>
+            <select id="batchFilter">
+              <option value="all">Show all</option>
+              <option value="valid">Valid only</option>
+              <option value="invalid">Invalid only</option>
+            </select>
+          </label>
+          <span class="toolbar-spacer"></span>
+          <button id="batchCopyBtn" type="button" class="ghost-btn">Copy CSV</button>
+          <button id="batchDownloadBtn" type="button" class="ghost-btn">Download CSV</button>
         </div>
-        <div class="stat">
-          <span class="stat-label">Date of birth</span>
-          <span class="stat-value" id="valDob">-</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Age</span>
-          <span class="stat-value" id="valAge">-</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Day of week born</span>
-          <span class="stat-value" id="valDow">-</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Serial number</span>
-          <span class="stat-value" id="valSeq">-</span>
-        </div>
-        <div class="stat">
-          <span class="stat-label">Checksum digit</span>
-          <span class="stat-value" id="valChecksum">-</span>
-        </div>
-      </div>
 
-      <button id="copyBtn" type="button" class="ghost-btn" hidden>Copy summary</button>
-    </section>
+        <div class="table-wrap">
+          <table class="batch-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Code</th>
+                <th scope="col">Status</th>
+                <th scope="col">Gender</th>
+                <th scope="col">Date of birth</th>
+                <th scope="col">Age</th>
+              </tr>
+            </thead>
+            <tbody id="batchBody"></tbody>
+          </table>
+        </div>
+        <p id="batchEmpty" class="help" hidden>No rows match this filter.</p>
+      </section>
+    </div>
+
+    <div id="panel-excel" role="tabpanel" aria-labelledby="tab-excel" hidden>
+      <section class="card" aria-labelledby="excel-heading">
+        <h2 id="excel-heading" class="sr-only">Excel formulas</h2>
+        <p class="help excel-intro">Decode a whole column in Excel. Put the codes in one column, paste each formula into the first row of its own column, then fill down. The formulas need Excel 365 or Excel 2021 or later (they use <code>LET</code> and <code>SEQUENCE</code>).</p>
+        <div class="excel-settings">
+          <label class="setting">
+            <span class="field-label">Codes are in column</span>
+            <input id="xlCol" type="text" value="A" maxlength="3" autocomplete="off" spellcheck="false" />
+          </label>
+          <label class="setting">
+            <span class="field-label">First data row</span>
+            <input id="xlRow" type="number" value="2" min="1" max="1048576" />
+          </label>
+          <label class="setting">
+            <span class="field-label">Argument separator</span>
+            <select id="xlSep">
+              <option value=",">Comma ( , ) English settings</option>
+              <option value=";">Semicolon ( ; ) Estonian / European</option>
+            </select>
+          </label>
+        </div>
+        <p class="help">If Excel says "There's a problem with this formula", switch the separator. Excel follows your Windows or macOS region settings, so where the decimal mark is a comma it expects semicolons.</p>
+      </section>
+
+      <div id="xlFormulas" class="formula-list"></div>
+
+      <p class="help excel-note">Format the date-of-birth column as a Date. Codes may be stored as numbers or as text. The status check ignores spaces and dashes, but the gender and date formulas expect plain 11-digit codes. Dates before 1900 (codes starting with 1 or 2) still validate, but Excel cannot display them as dates.</p>
+    </div>
 
     <section class="explainer">
       <details>
